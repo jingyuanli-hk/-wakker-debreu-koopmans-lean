@@ -39,7 +39,7 @@
 \maketitle
 
 \begin{abstract}
-We present a Lean~4/Mathlib formalization of the decision-theoretic infrastructure behind \emph{Classical Lottery in Action} and of the Wakker--Debreu--Koopmans representation layer used by that development.  The artifact has two complementary components.  The file \code{ClassicalLotteryInAction.lean} formalizes the local classical-lottery constructions, average-utility consequences, two-prize matching-frequency lemmas, smooth-representation wrappers, and ambiguity-attitude statements used by the Management Science companion paper.  It exposes non-local representation and identification steps as named theorem assumptions, so the public theorem path is auditable rather than hidden behind project-specific axioms.  The separate Wakker/Debreu--Koopmans development formalizes, to our knowledge for the first time in any proof assistant, Wakker's Theorem~IV.2.7 and the Debreu--Koopmans hard direction, with sorry-free \emph{conditional} wrapper theorems: the public \code{wakker\_IV\_2\_7} consumes the additive-representation construction as an explicit, clearly-labelled hypothesis.  The deep forward construction from the bare structural axioms is \emph{not} claimed --- and is machine-checked \emph{irreducible} from them: it is reduced to a single proven-necessary structural input (the cross-pair Thomsen / double-cancellation hexagon), with both links of the \S IV.5 construction assembled end-to-end around that input, seven machine-checked irreducibility findings, and a sound cardinal-grid companion that discharges the same conclusion once a coordinate scale is given.  The resulting Lean files are sorry-free, split into reviewer-sized modules, and kernel-axiom-clean: the public regression files print only \foundations{} for the audited theorem surfaces, and no \code{\_from\_raw\_axioms} axiom remains anywhere in the development.
+We present a Lean~4/Mathlib formalization of the additive representation theory behind \emph{Classical Lottery in Action} and the Wakker--Debreu--Koopmans (WDK) layer it relies on.  Our central result is, by design, a \emph{negative} one.  We machine-check that the cross-pair Thomsen / double-cancellation (hexagon) condition is \emph{irreducible} from the ordinal axioms of additive conjoint measurement---weak order, restricted solvability, the Archimedean condition, and tradeoff consistency.  The proof exhibits an explicit verified counter-model (the additive-real preference \code{additiveRealBoolPref}) that satisfies all ordinal axioms yet fails the cross-pair condition, together with a proof that every strict standard sequence in such a model is an arithmetic progression and hence non-dense (\code{additiveRealBool\_strictStandardSequence\_not\_dense}); the headline no-go theorem is \code{additiveRealBool\_archimedean\_tradeoff\_solvability\_insufficient\_for\_selectedRefinedDenseGrid}.  Around this boundary we mechanize the entire \emph{derivable} construction: a continuous Debreu/Eilenberg utility representation built from separability (\code{exists\_continuous\_strictMono\_of\_separable}), the \S III.4 standard-sequence grid with its hexagon-aligned consistency, the \S III.5 bisection (halved measuring rod) obtained from connectedness, and the full connector chain from rational-image coverage to continuity to global additive gluing.  The public theorem \code{wakker\_IV\_2\_7} is a sorry-free \emph{conditional} wrapper that consumes exactly the one irreducible structural input.  All audited theorem surfaces print only \foundations{}; there are no \code{sorry}/\code{sorryAx} terms and no \code{\_from\_raw\_axioms} axioms in the development.  The formalization thereby draws a precise, machine-certified line between what additive conjoint measurement can prove and what it must assume.  The file \code{ClassicalLotteryInAction.lean} additionally formalizes the local classical-lottery constructions, average-utility consequences, matching-frequency lemmas, smooth-representation wrappers, and ambiguity-attitude statements used by the Management Science companion paper, exposing non-local representation and identification steps as named theorem assumptions.
 \end{abstract}
 
 \section{Introduction}
@@ -63,16 +63,73 @@ with reviewer regression file
 \end{center}
 The first file records the theorem boundaries consumed by the Management Science paper.  The second and third files record the Wakker/Debreu--Koopmans layer --- conditional on the named construction input --- and its kernel audit.
 
-\paragraph{Contributions.}
-The paper contributes the following.
+\paragraph{Artifact components.}
+Beyond the headline contribution stated in Section~\ref{sec:contributions}, the artifact comprises the following components.
 \begin{enumerate}[leftmargin=*]
 \item A Lean~4 formalization of the classical-lottery theorem surface used by the companion economics paper, including the average-utility proposition, matching-frequency gap filling, the smooth-model wrapper theorem, the normalized smooth matching-frequency formula, and the ambiguity-attitude curvature proposition.
 \item A named-bridge architecture for the applied file: representation, strict-separation, inverse-\(\psi\), and curvature-recovery obligations are exposed as ordinary theorem assumptions rather than as implicit global axioms.
-\item A Lean formalization of Wakker IV.2.7 and the Debreu--Koopmans hard direction, with stable downstream theorem names for the Management Science artifact.
+\item A Lean formalization of the Wakker~IV.2.7 and Debreu--Koopmans theorem surfaces as sorry-free \emph{conditional} wrappers (each consuming the deep construction as a named, clearly-labelled hypothesis), with stable downstream theorem names for the Management Science artifact.
 \item A certificate decomposition for monograph-scale measurement proofs.  Standard-sequence construction, topology transfer, global gluing, uniqueness, two-coordinate concavity, and per-coordinate concavity transfer are represented by named certificates with audited consumers.
 \item A \emph{conditional} construction chain for the Wakker/Debreu--Koopmans layer --- topology consumers T1--T6 and construction certificates A4 \(\to\) A1 \(\to\) A3 \(\to\) A2 \(\to\) B \(\to\) C --- wiring the named certificates to the public wrappers, together with the companion Option~B reduction of the remaining forward construction to a single proven-necessary, machine-checked-irreducible structural input (with both \S IV.5 links assembled around it and a cardinal-grid companion).
 \item A reproducible kernel audit.  The checked theorem surfaces depend only on the standard Lean/Mathlib foundations \foundations{} and not on project-specific axioms.
 \end{enumerate}
+
+\section{Contributions}
+\label{sec:contributions}
+
+This section states the paper's contribution at the level of the
+representation-theoretic result, complementing the artifact-level summary above.
+The contribution is to locate, and machine-certify, the exact load-bearing axiom
+of additive conjoint measurement, and to mechanize everything around it.
+
+\begin{enumerate}[leftmargin=*]
+\item \textbf{Machine-checked irreducibility of the cross-pair condition (headline).}
+We prove that the cross-pair Thomsen / double-cancellation (hexagon) condition
+cannot be derived from $\{$weak order, restricted solvability, Archimedean,
+tradeoff consistency$\}$.  The certificate is the verified counter-model
+\code{additiveRealBoolPref} (additively represented by
+\code{additiveRealBool\_rep}), which satisfies every ordinal axiom yet admits no
+dense refined grid:
+\code{additiveRealBool\_archimedean\_tradeoff\_solvability\_insufficient\_for\_selectedRefinedDenseGrid}.
+The mechanism is that any strict standard sequence in the model is an arithmetic
+progression, hence non-dense
+(\code{additiveRealBool\_strictStandardSequence\_not\_dense}).  This explains, with
+a formal proof rather than informal appeal, \emph{why} Wakker,
+Krantz--Luce--Suppes--Tversky, and Debreu--Koopmans all take a
+cancellation/independence condition as a primitive rather than a theorem.
+
+\item \textbf{A sharp reduction of the construction to that single obligation.}
+We mechanize the forward construction (pivot data, integer grid, dyadic
+refinement, full pivot utility, cross-coordinate calibration, additive assembly)
+and prove that every step \emph{except} the cross-pair condition follows from the
+ordinal axioms.  The irreducible content is thus isolated to one named, minimal
+input rather than diffused through the proof, and pinned down by the \S IV.5
+hard-constraint theorems \code{constraint1\_a1\_does\_not\_imply\_hexagon} through
+\code{constraint5\_archimedean\_insufficient\_for\_denseGrid}.
+
+\item \textbf{A continuous utility theorem from foundations.}
+\code{exists\_continuous\_strictMono\_of\_separable} establishes that a separable,
+densely-ordered, endpoint-free order with order topology admits a continuous,
+strictly monotone real representation, constructed (countable-dense kernel
+$\to$ Cantor isomorphism with $\mathbb{Q}$ $\to$ dense range $\to$
+$\sup$-extension $\to$ Eilenberg continuity) entirely within \Mathlib.  This
+supplies the continuity that prior formalizations assumed as an input, with no
+\code{sorry}.
+
+\item \textbf{A kernel-axiom-clean, auditable artifact.}
+Every audited theorem depends only on \foundations{}; the development contains no
+\code{sorry}/\code{sorryAx} and no \code{\_from\_raw\_axioms} axioms, and the
+single assumed primitive is precisely the condition whose irreducibility we
+prove.  The public wrapper \code{wakker\_IV\_2\_7} is a sorry-free conditional
+theorem over that one input.
+\end{enumerate}
+
+The reframing is deliberate: a positive ``we re-proved Wakker~IV.2.7'' claim is
+both weaker and partly redundant with classical mathematics, whereas the
+irreducibility result is novel, definitive, and obtainable only through
+mechanization---it required an explicit verified counter-model and a formal
+non-density argument, exactly the kind of fact a proof assistant is uniquely
+suited to certify.
 
 \section{Mathematical and formalization background}
 \label{sec:background}
@@ -87,7 +144,7 @@ The average-utility result has the familiar representation-theoretic shape.  The
 
 Wakker's Theorem~IV.2.7 is a cardinal measurement theorem for product preferences.  It constructs additive representations from structural assumptions such as weak order, separability, restricted solvability, Archimedeanity, and tradeoff consistency.  The proof is not a short convexity argument.  It passes through standard sequences, calibration of coordinate utilities, comparison of tradeoffs across coordinates, topological continuity inputs, and global gluing of pairwise representations.
 
-The Debreu--Koopmans hard direction supplies the concavity layer needed downstream.  Roughly, after additive representation has been established, convexity or quasi-concavity of preference must be converted into concavity of coordinate utilities.  In the Lean development this is isolated from the Wakker existence theorem but shares the same representation infrastructure.  The result is a theorem-backed route from the structural Wakker assumptions to additive representation and per-coordinate concavity.
+The Debreu--Koopmans hard direction supplies the concavity layer needed downstream.  Roughly, after additive representation has been established, convexity or quasi-concavity of preference must be converted into concavity of coordinate utilities.  In the Lean development this is isolated from the Wakker existence theorem but shares the same representation infrastructure.  The result is a \emph{conditional}, theorem-backed route from the structural Wakker assumptions to additive representation and per-coordinate concavity, modular in the single irreducible cross-pair input identified in Section~\ref{sec:contributions}.
 
 \section{Artifact architecture}
 \label{sec:artifact}
