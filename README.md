@@ -74,8 +74,8 @@ Apache License 2.0 — see [`LICENSE.txt`](LICENSE.txt).
 ## Citation
 
 > Jingyuan Li, Ilia Tsetlin, and Fan Wang.
-> *Certificate-Driven Mechanization of the Wakker–Debreu–Koopmans Additive
-> Representation in Lean 4.*
+> *A Kernel-Clean Lean Mechanization of Classical Lottery in Action
+and the Wakker–Debreu–Koopmans Representation Layer*
 
 Please also cite the Management Science paper:
 
