@@ -1,1 +1,1 @@
-Full new README2 content here
+The full restored content with only arXiv link added (from /tmp/restore_readme2.md)
